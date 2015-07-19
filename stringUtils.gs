@@ -4,6 +4,11 @@ function stringUtilsTest() {
   Logger.log(removeExtFromFilename('hello'));
   Logger.log(removeExtFromFilename(''));
   logVerbose('hello, moose!');
+  
+  var fileTitle = 'moose.jpg';
+  logVerbose(convertTitleToUrlSafe(fileTitle));
+  
+  
 }
 
 function extFromFilename(filename) {
@@ -27,4 +32,12 @@ function logVerbose(str) {
     Logger.log(str);
   }
   return verbose;
+}
+
+function convertTitleToUrlSafe(fileTitle) {
+  var fileTitleLower = fileTitle.toLowerCase();
+  var fileTitleLowerSpaced = fileTitleLower.replace(/-/g, ' ');  // Turns '2015-02-21' into '2015 02 21' so it gets dashed later
+  var fileTitleLowerStripped = fileTitleLowerSpaced.replace(/[^\w\s]|_/g, "")
+  var fileTitleLowerStrippedDashed = fileTitleLowerStripped.replace(/\s+/g, "-");
+  return fileTitleLowerStrippedDashed;
 }
