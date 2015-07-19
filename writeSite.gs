@@ -56,7 +56,8 @@ function syncPages(site, siteHash, driveHash) {
       for (var attachmentNo in attachments) {
         var attachment = attachments[attachmentNo];
         var attachmentTitle = attachment.getTitle();
-        var attachmentName = convertTitleToUrlSafe(attachmentTitle);  // We don't strip the extension from blobs.  See related note in readDrive.gs
+        var attachmentExt = extFromFilename(attachmentTitle);
+        var attachmentName = convertTitleToUrlSafe(removeExtFromFilename(attachmentTitle)) + '.' + attachmentExt;  // We add the extension back in on purpose
         var attachmentPath = path + '-blobs/' + attachmentName;  // Calculate what the path of the attachment would be if it were inside the drive
         logVerbose('About to check whether ' + attachmentPath + ' is in driveHash...');
         if (!driveHash.hasOwnProperty(attachmentPath)) {
