@@ -1,8 +1,9 @@
 function stringUtilsTest() {
-  Logger.log(removeExtromFilename('hi.hello.txt'));
+  Logger.log(removeExtFromFilename('hi.hello.txt'));
   Logger.log(removeExtFromFilename('hello.txt'));
   Logger.log(removeExtFromFilename('hello'));
   Logger.log(removeExtFromFilename(''));
+  logVerbose('hello, moose!');
 }
 
 function extFromFilename(filename) {
@@ -18,10 +19,12 @@ function removeExtFromFilename(filename) {
 }
 
 function logVerbose(str) {
-  var scriptProperties = PropertiesService.getScriptProperties();
+  //var scriptProperties = PropertiesService.getScriptProperties();
   //var verbose = scriptProperties.getProperty('verbose');
-  var verbose = 'false';
+  var constants = getConstants();
+  var verbose = constants['verbose'];
   if (verbose === 'true') {
     Logger.log(str);
   }
+  return verbose;
 }
