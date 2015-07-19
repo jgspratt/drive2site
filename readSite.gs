@@ -11,11 +11,14 @@ function readSiteTest() {
       Logger.log(key + " -> " + siteHash[key]['pageName']);
     }
   }
+  
+  Logger.log(getParentPathFromPath('/grandparent/parent/child'));
+  Logger.log(getBlobParentPathFromPath('/foo/bar/baz-blobs/moose.jpg'));
 }
 
 function readSiteToHash(site, siteHash, parent, parentPath) {
   // Reads the site into a site hashmap in the format
-  // <url> : <pageName>, <pageTitle>,
+  // <url> : <pageName>, <pageTitle>, <pageLastUpdated>,
   // Where <url> is in the format "/parent-page/child-page"
   // Pass in parent as null; it's for recursion
   // Pass in parentPath as ''; it's for recursion
@@ -84,8 +87,28 @@ function getPathDepth(path) {
   return depth;
 }
 
+function getParentPathFromPath(path) {
+  // Returns '/grandparent/parent' from '/grandparent/parent/child'
+  var parentPathArray = path.substr(1).split('/');  // Get rid of leading '/'
+  parentPathArray.pop();  // Eliminate child element
+  var parentPath = '/' + parentPathArray.join('/');
+  logVerbose('The parent of ' + path + ' is ' + parentPath);
+  return parentPath;
+}
+
+function getBlobParentPathFromPath(path) {
+  // blobParentPath of '/foo/bar/baz-blobs/moose.jpg' will be '/foo/bar/baz'
+  var blobParentPathArray = path.substr(1).split('/');  // Get rid of leading '/'
+  blobParentPathArray.pop();  // Eliminate child element; now have '/foo/bar/baz-blobs'
+  var lastElementPosition = blobParentPathArray.length-1;
+  var lastElement = blobParentPathArray[lastElementPosition];
+  blobParentPathArray[lastElementPosition] = lastElement.substr(0, lastElement.length - '-blobs'.length);  // Now have '/foo/bar/baz'
+  var blobParentPath = '/' + blobParentPathArray.join('/');
+  return blobParentPath;
+}
+
 function getPageFromPath(site, path) {
-  // Pass in path in format /parent/child and get page object out
+  // Pass in path in format '/parent/child' and get page object out
   path = path.substr(1) // Eliminate leading '/'
   var pathArray = path.split('/');
   var page = null;
