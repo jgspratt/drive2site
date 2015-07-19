@@ -1,8 +1,9 @@
 function main() {
   Logger.log('START...');
   Logger.log('Get siteHash...');
-  var siteDomain = 'jgs.im';
-  var siteName = 'jgs';
+  var constants = getConstants();
+  var siteDomain = constants['siteDomain'];
+  var siteName = constants['siteName'];
   var site = SitesApp.getSite(siteDomain, siteName);
   var parentPage = null;
   var parentPath = '';
@@ -17,7 +18,7 @@ function main() {
   Logger.log('');
   
   Logger.log('Get driveHash...');
-  var driveSiteRootFolderId = 'xxx';
+  var driveSiteRootFolderId = constants['driveSiteRootFolderId'];
   var driveSiteRootFolder = DriveApp.getFolderById(driveSiteRootFolderId);
   var parentFolderPath = '';
   var driveHash = {};
@@ -30,3 +31,5 @@ function main() {
   Logger.log('Synced pages!');
   Logger.log('DONE!')
 }
+
+
