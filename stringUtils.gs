@@ -41,3 +41,8 @@ function convertTitleToUrlSafe(fileTitle) {
   var fileTitleLowerStrippedDashed = fileTitleLowerStripped.replace(/\s+/g, "-");
   return fileTitleLowerStrippedDashed;
 }
+
+function stripFancyQuotes(str) {
+  var strNoFancyQuotes = str.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"');
+  return strNoFancyQuotes;
+}
