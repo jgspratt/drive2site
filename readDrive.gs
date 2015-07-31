@@ -27,7 +27,7 @@ function readDriveToHash(driveHash, parentFolder, parentFolderPath) {
   var parentFolderName = convertTitleToUrlSafe(parentFolderTitle);
   
   var parentFolderIsBlobFolder = false;
-  if (parentFolderName.slice(-5) == 'blobs') {
+  if (parentFolderName.slice(-6) == '-blobs') {
     // This is a blobs folder, by convention
     parentFolderIsBlobFolder = true;
     logVerbose('parentFolderIsBlobFolder: true');
@@ -65,6 +65,8 @@ function readDriveToHash(driveHash, parentFolder, parentFolderPath) {
       var childFileIsBlob = false;
     }
     
+    var childFileIsDraft = (childFileName.slice(-6) == '-draft') ? true : false;
+    
     if (childFileIsBlob) {
       // If the child file is a blob, count the extension as part of the filename.
       //   This is because you could have, say, moose.pdf and moose.jpg attached to 
@@ -81,16 +83,21 @@ function readDriveToHash(driveHash, parentFolder, parentFolderPath) {
     logVerbose('fileName:' + childFileName);
     logVerbose('fileLastUpdated:' + childFileLastUpdated);
     logVerbose('fileIsBlob:' + childFileIsBlob);
-    driveHash[childFilePath] = {
-      'fileId':childFileId, 
-      'fileTitleLiteral':childFileTitleLiteral,
-      'fileTitle':childFileTitle,
-      'fileExt':childFileExt,
-      'fileName':childFileName, 
-      'fileType':childFileType,
-      'fileLastUpdated':childFileLastUpdated,
-      'fileIsBlob':childFileIsBlob,
-    };
+    logVerbose('childFileIsDraft:' + childFileIsDraft);
+    
+    if (!childFileIsDraft) {
+      driveHash[childFilePath] = {
+        'fileId':childFileId, 
+        'fileTitleLiteral':childFileTitleLiteral,
+        'fileTitle':childFileTitle,
+        'fileExt':childFileExt,
+        'fileName':childFileName, 
+        'fileType':childFileType,
+        'fileLastUpdated':childFileLastUpdated,
+        'fileIsBlob':childFileIsBlob,
+        'fileIsDraft':childFileIsDraft,
+      };
+    }
   }
   
   logVerbose('Gathered all files in ' + parentFolderTitle + '!');
@@ -106,7 +113,6 @@ function readDriveToHash(driveHash, parentFolder, parentFolderPath) {
   }
   logVerbose('Recursed through subfolders!');
 }
-
 
 
 
