@@ -1,144 +1,247 @@
-function readSiteTest() {
-  var siteDomain = 'jgs.im';
-  var siteName = 'jgs';
-  var site = SitesApp.getSite(siteDomain, siteName);
-  var siteHash = {};
-  readSiteToHash(site, siteHash, null, '');
-  Logger.log('hello thar');
-  Logger.log('maxPathDepth: ' + getMaxPathDepth(siteHash));
-  for (var key in siteHash) {
-    if (siteHash.hasOwnProperty(key)) {
-      Logger.log(key + " -> " + siteHash[key]['pageName']);
-    }
-  }
+function syncPages(site, siteHash, driveHash) {
+  // Goes through the whole site and adds missing content
   
-  Logger.log(getParentPathFromPath('/grandparent/parent/child'));
-  Logger.log(getBlobParentPathFromPath('/foo/bar/baz-blobs/moose.jpg'));
-}
-
-function readSiteToHash(site, siteHash, parent, parentPath) {
-  // Reads the site into a site hashmap in the format
-  // <url> : <pageName>, <pageTitle>, <pageLastUpdated>,
-  // Where <url> is in the format "/parent-page/child-page"
-  // Pass in parent as null; it's for recursion
-  // Pass in parentPath as ''; it's for recursion
+  var maxPathDepth = getMaxPathDepth(driveHash);
   
-  if (!parent) {
-    // Root of site; gather pages at root of site
-    var children = site.getChildren({
-      type: SitesApp.PageType.WEB_PAGE,
-      start: 0,
-      max: 200,
-      includeDrafts: false,
-      includeDeleted: false,
-    });
-  } else {
-    // Below root of site; gather children of parent page
-    var children = parent.getChildren({
-      type: SitesApp.PageType.WEB_PAGE,
-      start: 0,
-      max: 200,
-      includeDrafts: false,
-      includeDeleted: false,
-    });
-  }
+  Logger.log('');
+  Logger.log('We found that the maxPathDepth is ' + maxPathDepth);
+  Logger.log('');
   
-  var childrenLength = children.length;
-  
-  if (childrenLength === 0) {
-    // Base case; no children found
-    return;
-  }
-  
-  for (var i = 0; i < childrenLength; i++) {
-    // Put each immediate child into siteHash, then recurse
-    var child = children[i];
-    var childName = child.getName();
-    var childTitle = child.getTitle();
-    var childLastUpdated = child.getLastUpdated();
-    var childPath = parentPath + '/' + childName;
-    logVerbose('Adding childUrl: ' + children[i].getUrl() + ' (parent of ' + parent + ') to the siteHash');
-    siteHash[childPath] = {
-      'pageName':childName,
-      'pageTitle':childTitle,
-      'pageLastUpdated':childLastUpdated,
-    };
-    readSiteToHash(site, siteHash, child, childPath);
-  }
-}
-
-function getMaxPathDepth(siteHash) {
-  var maxDepth = 0;  // A page at /tech, for example, is at depth 0.  A page at /tech/irc is at depth 1
-  var thisDepth = 0;
-  for (var path in siteHash) {  // The path is the key
-    if (siteHash.hasOwnProperty(path)) {
-      thisDepth = getPathDepth(path);
-      if (thisDepth > maxDepth) {
-        maxDepth = thisDepth;
+  // Delete pages that exist in the Site but not in the Drive
+  // 
+  // Note: this section happens first to avoid the possibility of ever creating
+  //   a page later in the create page section that later gets it's parent deleted.
+  //   That shouldn't be possible either way, but I think this order makes more sense.
+  // 
+  for (var i = maxPathDepth; i >= 0; i--) {  // Start deleting from the deepest level
+    var pathDepth = 0;
+    for (var path in siteHash) {
+      pathDepth = getPathDepth(path);
+      if (pathDepth === i) {
+        // We are looking at paths at the right level (nearest infinity remaining) now
+        if (!driveHash.hasOwnProperty(path)) {
+          // Path is in Site but not in Drive; delete page from site
+          Logger.log('Found ' + path + ' in siteHash but not in driveHash; deleting...');
+          removePageFromPath(site, path);
+          Logger.log('Deleted ' + path + '!');
+        }
       }
     }
   }
-  return maxDepth;
+  
+  // Delete attachments that are on Site pages but not in the Drive
+  // 
+  // Note: there is no need to go in any "direction" of page depths because
+  //   the whole site tree exists at this point
+  // Also note: this section is after the "delete pages" section because
+  //   pages that get deleted also delete their attachments automatically
+  //   and because if (1) we went to delete missing attachments first and
+  //   (2) we want to check for page last updated date/time (so we don't have
+  //   to check every page, just those that have been updated more recently
+  //   in the drive than on the site), we wouldn't have a drive file with
+  //   which to compare the timestamp (because the triggering event for the
+  //   deletion of a page is the fact that the corresponding file is missing 
+  //   in the drive).
+  
+  logVerbose('Hello, moose.');
+  
+  for (var path in siteHash) {
+    // No need to consider depth since blobs are never the parents of blobs
+    if (driveHash.hasOwnProperty(path)) {
+      // Don't try to check all the pages because some of them might have been deleted in the previous phase
+      if (driveHash[path]['fileLastUpdated'] > siteHash[path]['pageLastUpdated']) {
+        // File has been recently updated in drive; check to see if attachments have been removed (we need to delete them)
+        
+        var page = getPageFromPath(site, path);
+        var attachments = page.getAttachments();
+        
+        for (var attachmentNo in attachments) {
+          var attachment = attachments[attachmentNo];
+          var attachmentTitle = attachment.getTitle();
+          var attachmentExt = extFromFilename(attachmentTitle);
+          var attachmentName = convertTitleToUrlSafe(removeExtFromFilename(attachmentTitle)) + '.' + attachmentExt;  // We add the extension back in on purpose
+          var attachmentPath = path + '-blobs/' + attachmentName;  // Calculate what the path of the attachment would be if it were inside the drive
+          logVerbose('About to check whether ' + attachmentPath + ' is in driveHash...');
+          if (!driveHash.hasOwnProperty(attachmentPath)) {
+            // Attachment is on page but missing in drive; delete it from the page
+            logVerbose('Found ' + attachmentPath + ' in Site but not in Drive. Deleting...');
+            attachment.deleteAttachment();
+            logVerbose('Deleted ' + attachmentPath + ' from Site!');
+          }
+        }
+      }
+    }
+  }
+  
+  
+  // Create pages that exist in the Drive but not in the Site
+  for (var i = 0; i <= maxPathDepth ; i++) {  // Start creating from the highest level
+    var pathDepth = 0;
+    for (var path in driveHash) {
+      pathDepth = getPathDepth(path);
+      if (pathDepth === i) {
+        // We are looking at paths at the right level (nearest 0 remaining) now
+        if ((!siteHash[path] || driveHash[path]['fileLastUpdated'] > siteHash[path]['pageLastUpdated']) && !driveHash[path]['fileIsBlob']) {
+          //Page does not exist yet or is older tha drive; update page
+          try {
+            logVerbose('Found ' + path + ' in driveHash; adding or updating...');
+            logVerbose('siteHash[path]:' + siteHash[path]);
+            logVerbose("driveHash[path]['fileLastUpdated']:" + driveHash[path]['fileLastUpdated']);
+            logVerbose("siteHash[path]['pageLastUpdated']:" + siteHash[path]['pageLastUpdated']);
+            logVerbose( driveHash[path]['fileLastUpdated'] > siteHash[path]['pageLastUpdated']);
+          } catch(e) {
+            // pageLastUpdated may not actually exist because this may be a new page.
+          }
+          createPageClobber(site, path, siteHash, driveHash);
+          Logger.log('CreatedOrUpdated ' + path + '!');
+        }
+      }
+    }
+  }
+  
+  // Create attachments that are in the Drive but not on Site pages
+  // Note: there is no need to go in any "direction" of page depths because
+  // the whole site tree exists at this point
+  for (var path in driveHash) {
+    
+    if (driveHash[path]['fileIsBlob']) {
+      // This is a blob
+      logVerbose('Found ' + path + ' in driveHash; it is a blob!');
+      
+      // The blobParentPath of '/foo/bar/baz-blobs/moose.jpg' will be '/foo/bar/baz'
+      var blobParentPath = getBlobParentPathFromPath(path);
+      var blobTitleLiteral = driveHash[path]['fileTitleLiteral'];
+      
+      logVerbose('blobParentPath:' + blobParentPath);
+      logVerbose('blobTitleLiteral:' + blobTitleLiteral);
+      
+      if (!siteHash.hasOwnProperty(path) || driveHash[blobParentPath]['fileLastUpdated'] > siteHash[blobParentPath]['pageLastUpdated']) {  // Some pages that need attachments may have just been created but weren't in the siteHash when the site was read
+        // Page has been recently updated in drive; it's worth checking to see if this file needs to be attached
+        var page = getPageFromPath(site, blobParentPath);
+        var attachments = page.getAttachments();
+        var attachmentTitlesArray = [];  // Used later to check if attachments are missing
+        
+        for (var attachmentNo in attachments) {
+          //  Loop through existing attachments and see if any need to be updated
+          var attachmentTitle = attachments[attachmentNo].getTitle();  // We always keep the attachment object Title the same as the Drive file's Title (the literal filename)
+          attachmentTitlesArray.push(attachmentTitle);  // Gather attachment titles so later we can see if any are missing and need to be added
+          
+          if (attachmentTitle == blobTitleLiteral) {  // blobTitleLiteral includes the file extension
+            // This attachment has a match in the drive and may need to be updated
+            var attachmentLastUpdated = attachments[attachmentNo].getLastUpdated();
+            
+            if (driveHash[path]['fileLastUpdated'] > attachmentLastUpdated) {
+              // This attachment has been updated more recently in the Drive than in the Site; update it in the site
+              logVerbose('Updating attachment ' + blobTitleLiteral + ' to the page ' + path + '...');
+              var fileId = driveHash[path]['fileId'];
+              var file = DriveApp.getFileById(fileId);
+              var fileBlob = file.getBlob();
+              attachments[attachmentNo].setFrom(fileBlob);
+              logVerbose('Updated it!');
+            }
+          }
+        }
+        
+        // Now that we have a list of attachment titles, check to see if the blob title is NOT in there and add it if it's missing
+        if (!inArray(blobTitleLiteral, attachmentTitlesArray)) {
+          // Found a blob that's missing from the attachment array; add it quick!
+          logVerbose('Adding ' + blobTitleLiteral + ' to the page ' + path + '...');
+          var fileId = driveHash[path]['fileId'];
+          var file = DriveApp.getFileById(fileId);
+          var fileBlob = file.getBlob();
+          var attachment = page.addHostedAttachment(fileBlob);
+          attachment.setTitle(blobTitleLiteral);
+          logVerbose('Added it!');
+        }
+        
+      }
+    }
+  }
 }
 
-function getPathDepth(path) {
-  var depth = path.substr(1).split('/').length - 1;  // A page at /tech, for example, is at depth 0.  A page at /tech/irc is at depth 1
-  //Logger.log('The depth of ' + path + ' is ' + depth);
-  return depth;
-}
-
-function getParentPathFromPath(path) {
-  // Returns '/grandparent/parent' from '/grandparent/parent/child'
-  var parentPathArray = path.substr(1).split('/');  // Get rid of leading '/'
-  parentPathArray.pop();  // Eliminate child element
-  var parentPath = '/' + parentPathArray.join('/');
-  logVerbose('The parent of ' + path + ' is ' + parentPath);
-  return parentPath;
-}
-
-function getBlobParentPathFromPath(path) {
-  // blobParentPath of '/foo/bar/baz-blobs/moose.jpg' will be '/foo/bar/baz'
-  var blobParentPathArray = path.substr(1).split('/');  // Get rid of leading '/'
-  blobParentPathArray.pop();  // Eliminate child element; now have '/foo/bar/baz-blobs'
-  var lastElementPosition = blobParentPathArray.length-1;
-  var lastElement = blobParentPathArray[lastElementPosition];
-  blobParentPathArray[lastElementPosition] = lastElement.substr(0, lastElement.length - '-blobs'.length);  // Now have '/foo/bar/baz'
-  var blobParentPath = '/' + blobParentPathArray.join('/');
-  return blobParentPath;
-}
-
-function getPageFromPath(site, path) {
-  // Pass in path in format '/parent/child' and get page object out
-  path = path.substr(1) // Eliminate leading '/'
-  var pathArray = path.split('/');
-  var page = null;
-  var pathArrayLength = pathArray.length;
-  if (pathArray[0] === '') {
-    // No URL given; return 'home' page
-    page = site.getChildByName('home');
-  } else if (pathArrayLength === 1) {
-    // This is a top level page
-    page = site.getChildByName(pathArray[0]);
+function createPageClobber(site, path, siteHash, driveHash) {
+  // Create page and/or clobber existing published content
+  // handle 'false' page ID for 'landing pages'
+  
+  var fileTitle = driveHash[path]['fileTitle'];
+  var fileName = driveHash[path]['fileName']
+  var fileId = driveHash[path]['fileId'];
+  var fileType = driveHash[path]['fileType'];
+  var fileExt = driveHash[path]['fileExt'];
+  var fileMd = '';
+  var fileHtml = '';
+  
+  if (!fileId) {
+    // fileId is false; there was only a folder for this page; make a landing page
+    fileHtml = 'This is the landing page for ' + fileTitle + '.';
   } else {
-    // Not a top level page
-    for (var i = 0; i < pathArrayLength; i++) {
-      if (i === 0) {
-        // At top level; must get the top level page first
-        page = site.getChildByName(pathArray[i]);
+    Logger.log('');
+    Logger.log('About to go into the switch with doc type "' + fileType + '" with an extension of "' + fileExt +'"');
+    if (fileType === 'application/vnd.google-apps.document') {
+      // This is a Google Doc
+      if (fileExt === 'md') {
+        // This is a Google Doc containing Markdown formatting
+        fileMd = getDocPlaintext(fileId);
+        fileHtml = convertMarkdownStringToHtml(fileMd);
       } else {
-        // Below top level; child page is child of current page
-        page = page.getChildByName(pathArray[i]);
+        // This is a Google Doc containing Google Doc formatting
+        fileHtml = convertDocToHtml(fileId);
       }
+    } else if (fileType === 'text/plain') {
+      // Plaintext file
+      fileHtml = convertMarkdownFileToHtml(fileId);
     }
   }
-  return page;
+  
+  if (siteHash[path]) {
+    // Page already exists; update page content instead of trying to make a new page
+    logVerbose('The HTML I am about to add is this: ' + fileHtml);
+    Logger.log('Updating the HTML...');
+    var page = getPageFromPath(site, path);
+    page.setHtmlContent(fileHtml);
+  } else {
+    // Page does not already exist; create page and add content
+    if (getPathDepth(path) > 0) {
+      // Page is not at root of site
+      logVerbose('The HTML I am about to add is this: ' + fileHtml);
+      var page = site.createWebPage(fileTitle, fileName+'-'+getRandomInt(0, Math.pow(2, 53)), fileHtml); // To avoid colisions because you can't assign the parent yet
+      page.setParent(getPageFromPath(site, path.substr(0, path.lastIndexOf('/'))));
+      page.setName(fileName);  // Fix the name
+    } else {
+      logVerbose('The HTML I am about to add is this: ' + fileHtml);
+      var page = site.createWebPage(fileTitle, fileName, fileHtml);
+    }
+  }
 }
 
-function getPathFromPage(site, page) {
-  var siteUrlLength = site.getUrl().length;
-  var pagePath = page.getUrl().substr(siteUrlLength - 1);
-  // The '- 1' is because the trailing slash is in the site url
-  // E.g., https://sites.google.com/a/jgs.im/jgs/
-  return pagePath;
+
+function createPageNoClobber() {
+  // Create page but do not clobber existing published content
+}
+
+function removePageFromPath(site, path) {
+  var page = getPageFromPath(site, path);
+  var pageName = page.getName();
+  var renamed = false;
+  
+  //TODO: delete any attachments?
+  // Nope: confirmed on 2015-07-13 that deleting a page deletes the attachments.
+  
+  while(!renamed) {
+    try {
+      var movedPageName = pageName+'-'+getRandomInt(0, Math.pow(2, 53));
+      page.setName(movedPageName);
+      renamed = true;
+    } catch(e) {
+      // Pick another number next time
+    }
+  }
+  logVerbose('Page got mobed to ' + movedPageName);
+  page.deletePage();
+  logVerbose('Deleted page at ' + path);
+}
+
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
