@@ -44,27 +44,30 @@ function syncPages(site, siteHash, driveHash) {
   //   in the drive).
   
   logVerbose('Hello, moose.');
-             
+  
   for (var path in siteHash) {
     // No need to consider depth since blobs are never the parents of blobs
-    if (driveHash[path]['fileLastUpdated'] > siteHash[path]['pageLastUpdated']) {
-      // File has been recently updated in drive; check to see if attachments have been removed (we need to delete them)
-      
-      var page = getPageFromPath(site, path);
-      var attachments = page.getAttachments();
-      
-      for (var attachmentNo in attachments) {
-        var attachment = attachments[attachmentNo];
-        var attachmentTitle = attachment.getTitle();
-        var attachmentExt = extFromFilename(attachmentTitle);
-        var attachmentName = convertTitleToUrlSafe(removeExtFromFilename(attachmentTitle)) + '.' + attachmentExt;  // We add the extension back in on purpose
-        var attachmentPath = path + '-blobs/' + attachmentName;  // Calculate what the path of the attachment would be if it were inside the drive
-        logVerbose('About to check whether ' + attachmentPath + ' is in driveHash...');
-        if (!driveHash.hasOwnProperty(attachmentPath)) {
-          // Attachment is on page but missing in drive; delete it from the page
-          logVerbose('Found ' + attachmentPath + ' in Site but not in Drive. Deleting...');
-          attachment.deleteAttachment();
-          logVerbose('Deleted ' + attachmentPath + ' from Site!');
+    if (driveHash.hasOwnProperty(path)) {
+      // Don't try to check all the pages because some of them might have been deleted in the previous phase
+      if (driveHash[path]['fileLastUpdated'] > siteHash[path]['pageLastUpdated']) {
+        // File has been recently updated in drive; check to see if attachments have been removed (we need to delete them)
+        
+        var page = getPageFromPath(site, path);
+        var attachments = page.getAttachments();
+        
+        for (var attachmentNo in attachments) {
+          var attachment = attachments[attachmentNo];
+          var attachmentTitle = attachment.getTitle();
+          var attachmentExt = extFromFilename(attachmentTitle);
+          var attachmentName = convertTitleToUrlSafe(removeExtFromFilename(attachmentTitle)) + '.' + attachmentExt;  // We add the extension back in on purpose
+          var attachmentPath = path + '-blobs/' + attachmentName;  // Calculate what the path of the attachment would be if it were inside the drive
+          logVerbose('About to check whether ' + attachmentPath + ' is in driveHash...');
+          if (!driveHash.hasOwnProperty(attachmentPath)) {
+            // Attachment is on page but missing in drive; delete it from the page
+            logVerbose('Found ' + attachmentPath + ' in Site but not in Drive. Deleting...');
+            attachment.deleteAttachment();
+            logVerbose('Deleted ' + attachmentPath + ' from Site!');
+          }
         }
       }
     }
@@ -112,7 +115,7 @@ function syncPages(site, siteHash, driveHash) {
       logVerbose('blobParentPath:' + blobParentPath);
       logVerbose('blobTitleLiteral:' + blobTitleLiteral);
       
-      if (driveHash[blobParentPath]['fileLastUpdated'] > siteHash[blobParentPath]['pageLastUpdated']) {  // TODO: this errored "pageLastUpdated" from undefined"--I think it was because the page didn't exist in the site yet for some reason, but I don't how that's possible yet
+      if (!siteHash.hasOwnProperty(path) || driveHash[blobParentPath]['fileLastUpdated'] > siteHash[blobParentPath]['pageLastUpdated']) {  // Some pages that need attachments may have just been created but weren't in the siteHash when the site was read
         // Page has been recently updated in drive; it's worth checking to see if this file needs to be attached
         var page = getPageFromPath(site, blobParentPath);
         var attachments = page.getAttachments();
