@@ -1,3 +1,5 @@
+// arrayUtils.gs
+////////////////
 
 function inArray(obj, a) {
   // Is the object in the array?
@@ -8,3 +10,5 @@ function inArray(obj, a) {
     }
     return false;
 }
+
+

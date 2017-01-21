@@ -1,3 +1,6 @@
+// readDrive.gs
+///////////////
+
 function readDriveTest() {
   var driveSiteRootFolderId = '0ByW5vWEXWH2oMTUxcFRrVnFLRjg';
   var driveSiteRootFolder = DriveApp.getFolderById(driveSiteRootFolderId);
@@ -9,8 +12,6 @@ function readDriveTest() {
       logVerbose(key + " -> " + driveHash[key]['fileName']);
     }
   }
-  
-
 }
 
 

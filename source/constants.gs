@@ -1,3 +1,6 @@
+// constants.gs
+///////////////
+
 function getConstants() {
   // Returns an array of the constants you will need to set in order to
   // get this to work for your own site
@@ -14,3 +17,5 @@ function getConstants() {
   };
   return constants;
 }
+
+

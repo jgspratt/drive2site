@@ -1,3 +1,6 @@
+// readSite.gs
+//////////////
+
 function readSiteTest() {
   var siteDomain = 'jgs.im';
   var siteName = 'jgs';
@@ -15,6 +18,7 @@ function readSiteTest() {
   Logger.log(getParentPathFromPath('/grandparent/parent/child'));
   Logger.log(getBlobParentPathFromPath('/foo/bar/baz-blobs/moose.jpg'));
 }
+
 
 function readSiteToHash(site, siteHash, parent, parentPath) {
   // Reads the site into a site hashmap in the format
@@ -67,6 +71,7 @@ function readSiteToHash(site, siteHash, parent, parentPath) {
   }
 }
 
+
 function getMaxPathDepth(siteHash) {
   var maxDepth = 0;  // A page at /tech, for example, is at depth 0.  A page at /tech/irc is at depth 1
   var thisDepth = 0;
@@ -81,11 +86,13 @@ function getMaxPathDepth(siteHash) {
   return maxDepth;
 }
 
+
 function getPathDepth(path) {
   var depth = path.substr(1).split('/').length - 1;  // A page at /tech, for example, is at depth 0.  A page at /tech/irc is at depth 1
   //Logger.log('The depth of ' + path + ' is ' + depth);
   return depth;
 }
+
 
 function getParentPathFromPath(path) {
   // Returns '/grandparent/parent' from '/grandparent/parent/child'
@@ -95,6 +102,7 @@ function getParentPathFromPath(path) {
   logVerbose('The parent of ' + path + ' is ' + parentPath);
   return parentPath;
 }
+
 
 function getBlobParentPathFromPath(path) {
   // blobParentPath of '/foo/bar/baz-blobs/moose.jpg' will be '/foo/bar/baz'
@@ -106,6 +114,7 @@ function getBlobParentPathFromPath(path) {
   var blobParentPath = '/' + blobParentPathArray.join('/');
   return blobParentPath;
 }
+
 
 function getPageFromPath(site, path) {
   // Pass in path in format '/parent/child' and get page object out
@@ -134,6 +143,7 @@ function getPageFromPath(site, path) {
   return page;
 }
 
+
 function getPathFromPage(site, page) {
   var siteUrlLength = site.getUrl().length;
   var pagePath = page.getUrl().substr(siteUrlLength - 1);
@@ -141,4 +151,5 @@ function getPathFromPage(site, page) {
   // E.g., https://sites.google.com/a/jgs.im/jgs/
   return pagePath;
 }
+
 

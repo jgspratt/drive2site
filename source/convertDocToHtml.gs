@@ -1,3 +1,8 @@
+// convertDocToHtml.gs
+//////////////////////
+
+// Credit: https://github.com/mangini/gdocs2md/blob/master/converttomarkdown.gapps
+
 function convertDocToHtml(fileId) {
   var document = DocumentApp.openById(fileId);
   var body = document.getBody();

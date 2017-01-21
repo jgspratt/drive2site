@@ -1,3 +1,8 @@
+// convertDocToMd.gs
+////////////////////
+
+// Credit: https://github.com/mangini/gdocs2md/blob/master/converttomarkdown.gapps
+
 /*
 Usage: 
   Adding this script to your doc: 
@@ -301,3 +306,5 @@ function processTextElement(inSrc, txt) {
   }
   return pOut;
 }
+
+

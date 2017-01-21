@@ -1,3 +1,6 @@
+// main.gs
+//////////
+
 function main() {
   Logger.log('START...');
   Logger.log('Get siteHash...');

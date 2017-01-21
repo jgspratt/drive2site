@@ -1,3 +1,5 @@
+// testPage.gs
+//////////////
 
 function testParentExists(site, breadcrumb) {
   // Does the whole breadcrumb path exist?
@@ -8,6 +10,7 @@ function testParentExists(site, breadcrumb) {
     return true;
   }
 }
+
 
 function testPageExists(site, pageName, breadcrumb, parent) {
   if (!parent) {
@@ -40,3 +43,5 @@ function testPageExists2(site, pageName) {
     return true;
   }
 }
+
+

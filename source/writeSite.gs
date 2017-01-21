@@ -1,3 +1,6 @@
+// writeSite.gs
+///////////////
+
 function syncPages(site, siteHash, driveHash) {
   // Goes through the whole site and adds missing content
   
@@ -160,6 +163,7 @@ function syncPages(site, siteHash, driveHash) {
   }
 }
 
+
 function createPageClobber(site, path, siteHash, driveHash) {
   // Create page and/or clobber existing published content
   // handle 'false' page ID for 'landing pages'
@@ -219,6 +223,7 @@ function createPageNoClobber() {
   // Create page but do not clobber existing published content
 }
 
+
 function removePageFromPath(site, path) {
   var page = getPageFromPath(site, path);
   var pageName = page.getName();
@@ -244,4 +249,6 @@ function removePageFromPath(site, path) {
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+
 
