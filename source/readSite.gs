@@ -57,7 +57,7 @@ function readSiteToHash(site, siteHash, parent, parentPath) {
     var childTitle = child.getTitle();
     var childLastUpdated = child.getLastUpdated();
     var childPath = parentPath + '/' + childName;
-    logVerbose('Adding childUrl: ' + children[i].getUrl() + ' (parent of ' + parent + ') to the siteHash');
+    logVerbose('Adding childUrl: ' + children[i].getUrl() + ' (child of ' + parentPath + ') to the siteHash');
     siteHash[childPath] = {
       'pageName':childName,
       'pageTitle':childTitle,
