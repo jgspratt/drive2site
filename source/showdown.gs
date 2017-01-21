@@ -11,9 +11,9 @@
 //
 // The full source distribution is at:
 //
-//				A A L
-//				T C A
-//				T K B
+//        A A L
+//        T C A
+//        T K B
 //
 //   <http://www.attacklab.net/>
 //
@@ -277,19 +277,19 @@ Showdown.converter = function (converter_options) {
     var text = text.replace(/
     ^[ ]{0,3}\[(.+)\]:  // id = $1  attacklab: g_tab_width - 1
     [ \t]*
-    \n?				// maybe *one* newline
+    \n?        // maybe *one* newline
     [ \t]*
-    <?(\S+?)>?			// url = $2
+    <?(\S+?)>?      // url = $2
     [ \t]*
-    \n?				// maybe one newline
+    \n?        // maybe one newline
     [ \t]*
     (?:
-    (\n*)				// any lines skipped = $3 attacklab: lookbehind removed
+    (\n*)        // any lines skipped = $3 attacklab: lookbehind removed
     ["(]
-    (.+?)				// title = $4
+    (.+?)        // title = $4
     [")]
     [ \t]*
-    )?					// title is optional
+    )?          // title is optional
     (?:\n+|$)
     /gm,
     function(){...});
@@ -349,16 +349,16 @@ Showdown.converter = function (converter_options) {
     // attacklab: This regex can be expensive when it fails.
     /*
     var text = text.replace(/
-    (						// save in $1
-    ^					// start of line  (with /m)
-    <($block_tags_a)	// start tag = $2
-    \b					// word break
+    (            // save in $1
+    ^          // start of line  (with /m)
+    <($block_tags_a)  // start tag = $2
+    \b          // word break
     // attacklab: hack around khtml/pcre bug...
-    [^\r]*?\n			// any number of lines, minimally matching
-    </\2>				// the matching end tag
-    [ \t]*				// trailing spaces/tabs
-    (?=\n+)				// followed by a newline
-    )						// attacklab: there are sentinel newlines at end of document
+    [^\r]*?\n      // any number of lines, minimally matching
+    </\2>        // the matching end tag
+    [ \t]*        // trailing spaces/tabs
+    (?=\n+)        // followed by a newline
+    )            // attacklab: there are sentinel newlines at end of document
     /gm,function(){...}};
     */
     text = text.replace(/^(<(p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del)\b[^\r]*?\n<\/\2>[ \t]*(?=\n+))/gm, hashElement);
@@ -369,16 +369,16 @@ Showdown.converter = function (converter_options) {
     
     /*
     var text = text.replace(/
-    (						// save in $1
-    ^					// start of line  (with /m)
-    <($block_tags_b)	// start tag = $2
-    \b					// word break
+    (            // save in $1
+    ^          // start of line  (with /m)
+    <($block_tags_b)  // start tag = $2
+    \b          // word break
     // attacklab: hack around khtml/pcre bug...
-    [^\r]*?				// any number of lines, minimally matching
-    </\2>				// the matching end tag
-    [ \t]*				// trailing spaces/tabs
-    (?=\n+)				// followed by a newline
-    )						// attacklab: there are sentinel newlines at end of document
+    [^\r]*?        // any number of lines, minimally matching
+    </\2>        // the matching end tag
+    [ \t]*        // trailing spaces/tabs
+    (?=\n+)        // followed by a newline
+    )            // attacklab: there are sentinel newlines at end of document
     /gm,function(){...}};
     */
     text = text.replace(/^(<(p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|style|section|header|footer|nav|article|aside)\b[^\r]*?<\/\2>[ \t]*(?=\n+)\n)/gm, hashElement);
@@ -388,15 +388,15 @@ Showdown.converter = function (converter_options) {
     
     /*
     text = text.replace(/
-    (						// save in $1
-    \n\n				// Starting after a blank line
+    (            // save in $1
+    \n\n        // Starting after a blank line
     [ ]{0,3}
-    (<(hr)				// start tag = $2
-    \b					// word break
-    ([^<>])*?			//
-    \/?>)				// the matching end tag
+    (<(hr)        // start tag = $2
+    \b          // word break
+    ([^<>])*?      //
+    \/?>)        // the matching end tag
     [ \t]*
-    (?=\n{2,})			// followed by a blank line
+    (?=\n{2,})      // followed by a blank line
     )
     /g,hashElement);
     */
@@ -406,14 +406,14 @@ Showdown.converter = function (converter_options) {
     
     /*
     text = text.replace(/
-    (						// save in $1
-    \n\n				// Starting after a blank line
-    [ ]{0,3}			// attacklab: g_tab_width - 1
+    (            // save in $1
+    \n\n        // Starting after a blank line
+    [ ]{0,3}      // attacklab: g_tab_width - 1
     <!
     (--[^\r]*?--\s*)+
     >
     [ \t]*
-    (?=\n{2,})			// followed by a blank line
+    (?=\n{2,})      // followed by a blank line
     )
     /g,hashElement);
     */
@@ -424,17 +424,17 @@ Showdown.converter = function (converter_options) {
     /*
     text = text.replace(/
     (?:
-    \n\n				// Starting after a blank line
+    \n\n        // Starting after a blank line
     )
-    (						// save in $1
-    [ ]{0,3}			// attacklab: g_tab_width - 1
+    (            // save in $1
+    [ ]{0,3}      // attacklab: g_tab_width - 1
     (?:
-    <([?%])			// $2
+    <([?%])      // $2
     [^\r]*?
     \2>
     )
     [ \t]*
-    (?=\n{2,})			// followed by a blank line
+    (?=\n{2,})      // followed by a blank line
     )
     /g,hashElement);
     */
@@ -545,22 +545,22 @@ Showdown.converter = function (converter_options) {
     
     /*
     text = text.replace(/
-    (							// wrap whole match in $1
+    (              // wrap whole match in $1
     \[
     (
     (?:
-    \[[^\]]*\]		// allow brackets nested one level
+    \[[^\]]*\]    // allow brackets nested one level
     |
-    [^\[]			// or anything else
+    [^\[]      // or anything else
     )*
     )
     \]
-    [ ]?					// one optional space
-    (?:\n[ ]*)?				// one optional newline followed by spaces
+    [ ]?          // one optional space
+    (?:\n[ ]*)?        // one optional newline followed by spaces
     \[
-    (.*?)					// id = $3
+    (.*?)          // id = $3
     \]
-    )()()()()					// pad remaining backreferences
+    )()()()()          // pad remaining backreferences
     /g,_DoAnchors_callback);
     */
     text = text.replace(/(\[((?:\[[^\]]*\]|[^\[\]])*)\][ ]?(?:\n[ ]*)?\[(.*?)\])()()()()/g, writeAnchorTag);
@@ -571,27 +571,27 @@ Showdown.converter = function (converter_options) {
     
     /*
     text = text.replace(/
-    (						// wrap whole match in $1
+    (            // wrap whole match in $1
     \[
     (
     (?:
-    \[[^\]]*\]	// allow brackets nested one level
+    \[[^\]]*\]  // allow brackets nested one level
     |
-    [^\[\]]			// or anything else
+    [^\[\]]      // or anything else
     )
     )
     \]
-    \(						// literal paren
+    \(            // literal paren
     [ \t]*
-    ()						// no id, so leave $3 empty
-    <?(.*?)>?				// href = $4
+    ()            // no id, so leave $3 empty
+    <?(.*?)>?        // href = $4
     [ \t]*
-    (						// $5
-    (['"])				// quote char = $6
-    (.*?)				// Title = $7
-    \6					// matching quote
-    [ \t]*				// ignore any spaces/tabs between closing quote and )
-    )?						// title is optional
+    (            // $5
+    (['"])        // quote char = $6
+    (.*?)        // Title = $7
+    \6          // matching quote
+    [ \t]*        // ignore any spaces/tabs between closing quote and )
+    )?            // title is optional
     \)
     )
     /g,writeAnchorTag);
@@ -606,11 +606,11 @@ Showdown.converter = function (converter_options) {
     
     /*
     text = text.replace(/
-    (		 					// wrap whole match in $1
+    (               // wrap whole match in $1
     \[
-    ([^\[\]]+)				// link text = $2; can't contain '[' or ']'
+    ([^\[\]]+)        // link text = $2; can't contain '[' or ']'
     \]
-    )()()()()()					// pad rest of backreferences
+    )()()()()()          // pad rest of backreferences
     /g, writeAnchorTag);
     */
     text = text.replace(/(\[([^\[\]]+)\])()()()()()/g, writeAnchorTag);
@@ -674,16 +674,16 @@ Showdown.converter = function (converter_options) {
     
     /*
     text = text.replace(/
-    (						// wrap whole match in $1
+    (            // wrap whole match in $1
     !\[
-    (.*?)				// alt text = $2
+    (.*?)        // alt text = $2
     \]
-    [ ]?				// one optional space
-    (?:\n[ ]*)?			// one optional newline followed by spaces
+    [ ]?        // one optional space
+    (?:\n[ ]*)?      // one optional newline followed by spaces
     \[
-    (.*?)				// id = $3
+    (.*?)        // id = $3
     \]
-    )()()()()				// pad rest of backreferences
+    )()()()()        // pad rest of backreferences
     /g,writeImageTag);
     */
     text = text.replace(/(!\[(.*?)\][ ]?(?:\n[ ]*)?\[(.*?)\])()()()()/g, writeImageTag);
@@ -694,22 +694,22 @@ Showdown.converter = function (converter_options) {
     
     /*
     text = text.replace(/
-    (						// wrap whole match in $1
+    (            // wrap whole match in $1
     !\[
-    (.*?)				// alt text = $2
+    (.*?)        // alt text = $2
     \]
-    \s?					// One optional whitespace character
-    \(					// literal paren
+    \s?          // One optional whitespace character
+    \(          // literal paren
     [ \t]*
-    ()					// no id, so leave $3 empty
-    <?(\S+?)>?			// src url = $4
+    ()          // no id, so leave $3 empty
+    <?(\S+?)>?      // src url = $4
     [ \t]*
-    (					// $5
-    (['"])			// quote char = $6
-    (.*?)			// title = $7
-    \6				// matching quote
+    (          // $5
+    (['"])      // quote char = $6
+    (.*?)      // title = $7
+    \6        // matching quote
     [ \t]*
-    )?					// title is optional
+    )?          // title is optional
     \)
     )
     /g,writeImageTag);
@@ -767,11 +767,11 @@ Showdown.converter = function (converter_options) {
   var _DoHeaders = function (text) {
     
     // Setext-style headers:
-    //	Header 1
-    //	========
+    //  Header 1
+    //  ========
     //
-    //	Header 2
-    //	--------
+    //  Header 2
+    //  --------
     //
     text = text.replace(/^(.+)[ \t]*\n=+[ \t]*\n+/gm,
                         function (wholeMatch, m1) {
@@ -793,11 +793,11 @@ Showdown.converter = function (converter_options) {
     
     /*
     text = text.replace(/
-    ^(\#{1,6})				// $1 = string of #'s
+    ^(\#{1,6})        // $1 = string of #'s
     [ \t]*
-    (.+?)					// $2 = Header text
+    (.+?)          // $2 = Header text
     [ \t]*
-    \#*						// optional closing #'s (not counted)
+    \#*            // optional closing #'s (not counted)
     \n+
     /gm, function() {...});
     */
@@ -831,19 +831,19 @@ Showdown.converter = function (converter_options) {
     
     /*
     var whole_list = /
-    (									// $1 = whole list
-    (								// $2
-    [ ]{0,3}					// attacklab: g_tab_width - 1
-    ([*+-]|\d+[.])				// $3 = first list item marker
+    (                  // $1 = whole list
+    (                // $2
+    [ ]{0,3}          // attacklab: g_tab_width - 1
+    ([*+-]|\d+[.])        // $3 = first list item marker
     [ \t]+
     )
     [^\r]+?
-    (								// $4
-    ~0							// sentinel for workaround; should be $
+    (                // $4
+    ~0              // sentinel for workaround; should be $
     |
     \n{2,}
     (?=\S)
-    (?!							// Negative lookahead for another list item marker
+    (?!              // Negative lookahead for another list item marker
     [ \t]*
     (?:[*+-]|\d+[.])[ \t]+
     )
@@ -930,10 +930,10 @@ Showdown.converter = function (converter_options) {
     
     /*
     list_str = list_str.replace(/
-    (\n)?							// leading line = $1
-    (^[ \t]*)						// leading whitespace = $2
-    ([*+-]|\d+[.]) [ \t]+			// list marker = $3
-    ([^\r]+?						// list item text   = $4
+    (\n)?              // leading line = $1
+    (^[ \t]*)            // leading whitespace = $2
+    ([*+-]|\d+[.]) [ \t]+      // list marker = $3
+    ([^\r]+?            // list item text   = $4
     (\n{1,2}))
     (?= \n* (~0 | \2 ([*+-]|\d+[.]) [ \t]+))
     /gm, function(){...});
@@ -973,13 +973,13 @@ Showdown.converter = function (converter_options) {
     /*
     text = text.replace(text,
     /(?:\n\n|^)
-    (								// $1 = the code block -- one or more lines, starting with a space/tab
+    (                // $1 = the code block -- one or more lines, starting with a space/tab
     (?:
-    (?:[ ]{4}|\t)			// Lines must start with a tab or a tab-width of spaces - attacklab: g_tab_width
+    (?:[ ]{4}|\t)      // Lines must start with a tab or a tab-width of spaces - attacklab: g_tab_width
     .*\n+
     )+
     )
-    (\n*[ ]{0,3}[^ \t\n]|(?=~0))	// attacklab: g_tab_width
+    (\n*[ ]{0,3}[^ \t\n]|(?=~0))  // attacklab: g_tab_width
     /g,function(){...});
     */
     
@@ -996,7 +996,7 @@ Showdown.converter = function (converter_options) {
                           codeblock = codeblock.replace(/^\n+/g, ""); // trim leading newlines
                           codeblock = codeblock.replace(/\n+$/g, ""); // trim trailing whitespace
                           
-                          codeblock = "<pre><code>" + codeblock + "\n</code></pre>";
+                          codeblock = '<pre><code ' + (getConstants())['codeBlockStyle'] + '>' + codeblock + "\n</code></pre>";
                           
                           return hashBlock(codeblock) + nextChar;
                         }
@@ -1033,7 +1033,7 @@ Showdown.converter = function (converter_options) {
                           codeblock = codeblock.replace(/^\n+/g, ""); // trim leading newlines
                           codeblock = codeblock.replace(/\n+$/g, ""); // trim trailing whitespace
                           
-                          codeblock = "<pre><code" + (language ? " class=\"" + language + '"' : "") + ">" + codeblock + "\n</code></pre>";
+                          codeblock = "<pre><code " + (getConstants())['codeBlockStyle'] + ' ' + (language ? " class=\"" + language + '"' : "") + ">" + codeblock + "\n</code></pre>";
                           
                           return hashBlock(codeblock);
                         }
@@ -1055,47 +1055,51 @@ Showdown.converter = function (converter_options) {
     //   *  Backtick quotes are used for <code></code> spans.
     //
     //   *  You can use multiple backticks as the delimiters if you want to
-    //	 include literal backticks in the code span. So, this input:
+    //   include literal backticks in the code span. So, this input:
     //
-    //		 Just type ``foo `bar` baz`` at the prompt.
+    //     Just type ``foo `bar` baz`` at the prompt.
     //
-    //	   Will translate to:
+    //     Will translate to:
     //
-    //		 <p>Just type <code>foo `bar` baz</code> at the prompt.</p>
+    //     <p>Just type <code>foo `bar` baz</code> at the prompt.</p>
     //
-    //	There's no arbitrary limit to the number of backticks you
-    //	can use as delimters. If you need three consecutive backticks
-    //	in your code, use four for delimiters, etc.
+    //  There's no arbitrary limit to the number of backticks you
+    //  can use as delimters. If you need three consecutive backticks
+    //  in your code, use four for delimiters, etc.
     //
     //  *  You can use spaces to get literal backticks at the edges:
     //
-    //		 ... type `` `bar` `` ...
+    //     ... type `` `bar` `` ...
     //
-    //	   Turns to:
+    //     Turns to:
     //
-    //		 ... type <code>`bar`</code> ...
+    //     ... type <code>`bar`</code> ...
     //
     
     /*
     text = text.replace(/
-    (^|[^\\])					// Character before opening ` can't be a backslash
-    (`+)						// $2 = Opening run of `
-    (							// $3 = The code block
+    (^|[^\\])          // Character before opening ` can't be a backslash
+    (`+)            // $2 = Opening run of `
+    (              // $3 = The code block
     [^\r]*?
-    [^`]					// attacklab: work around lack of lookbehind
+    [^`]          // attacklab: work around lack of lookbehind
     )
-    \2							// Matching closer
+    \2              // Matching closer
     (?!`)
     /gm, function(){...});
     */
     
     text = text.replace(/(^|[^\\])(`+)([^\r]*?[^`])\2(?!`)/gm,
                         function (wholeMatch, m1, m2, m3, m4) {
+                          //var constants = getConstants();
+                          //var codeBlockStyle = constants['codeBlockStyle'];
+                          //logVerbose('codeBlockStyle');
+                          //logVerbose(codeBlockStyle);
                           var c = m3;
-                          c = c.replace(/^([ \t]*)/g, "");	// leading whitespace
-                          c = c.replace(/[ \t]*$/g, "");	// trailing whitespace
+                          c = c.replace(/^([ \t]*)/g, "");  // leading whitespace
+                          c = c.replace(/[ \t]*$/g, "");  // trailing whitespace
                           c = _EncodeCode(c);
-                          return m1 + "<code>" + c + "</code>";
+                          return m1 + '<code ' + (getConstants())['codeSpanStyle'] + '>' + c + "</code>";
                         });
     
     return text;
@@ -1132,13 +1136,12 @@ Showdown.converter = function (converter_options) {
   }
   
   var _DoItalicsAndBold = function (text) {
+    var constants = getConstants();
     
     // <strong> must go first:
-    text = text.replace(/(\*\*|__)(?=\S)([^\r]*?\S[*_]*)\1/g,
-                        "<strong>$2</strong>");
+    text = text.replace(/(\*\*|__)(?=\S)([^\r]*?\S[*_]*)\1/g, "<strong " + constants['strongStyle'] + ">$2</strong>");
     
-    text = text.replace(/(\*|_)(?=\S)([^\r]*?\S)\1/g,
-                        "<em>$2</em>");
+    text = text.replace(/(\*|_)(?=\S)([^\r]*?\S)\1/g, "<em " + constants['emStyle'] + ">$2</em>");
     
     return text;
   }
@@ -1147,12 +1150,12 @@ Showdown.converter = function (converter_options) {
     
     /*
     text = text.replace(/
-    (								// Wrap whole match in $1
+    (                   // Wrap whole match in $1
     (
-    ^[ \t]*>[ \t]?			// '>' at the start of a line
-    .+\n					// rest of the first line
-    (.+\n)*					// subsequent consecutive lines
-    \n*						// blanks
+    ^[ \t]*>[ \t]?      // '>' at the start of a line
+    .+\n                // rest of the first line
+    (.+\n)*             // subsequent consecutive lines
+    \n*                 // blanks
     )+
     )
     /gm, function(){...});
@@ -1165,13 +1168,13 @@ Showdown.converter = function (converter_options) {
                           // attacklab: hack around Konqueror 3.5.4 bug:
                           // "----------bug".replace(/^-/g,"") == "bug"
                           
-                          bq = bq.replace(/^[ \t]*>[ \t]?/gm, "~0");	// trim one level of quoting
+                          bq = bq.replace(/^[ \t]*>[ \t]?/gm, "~0");  // trim one level of quoting
                           
                           // attacklab: clean up hack
                           bq = bq.replace(/~0/g, "");
                           
-                          bq = bq.replace(/^[ \t]+$/gm, "");		// trim whitespace-only lines
-                          bq = _RunBlockGamut(bq);				// recurse
+                          bq = bq.replace(/^[ \t]+$/gm, "");    // trim whitespace-only lines
+                          bq = _RunBlockGamut(bq);        // recurse
                           
                           bq = bq.replace(/(^|\n)/g, "$1  ");
                           // These leading spaces screw with <pre> content, so we need to fix that:
@@ -1254,16 +1257,16 @@ Showdown.converter = function (converter_options) {
   
   var _EncodeBackslashEscapes = function (text) {
     //
-    //   Parameter:  String.
-    //   Returns:	The string, with after processing the following backslash
-    //			   escape sequences.
+    //   Parameter: String.
+    //   Returns:   The string, with after processing the following backslash
+    //              escape sequences.
     //
     
     // attacklab: The polite way to do this is with the new
     // escapeCharacters() function:
     //
-    // 	text = escapeCharacters(text,"\\",true);
-    // 	text = escapeCharacters(text,"`*_{}[]()>#+-.!",true);
+    //   text = escapeCharacters(text,"\\",true);
+    //   text = escapeCharacters(text,"`*_{}[]()>#+-.!",true);
     //
     // ...but we're sidestepping its use of the (slow) RegExp constructor
     // as an optimization for Firefox.  This function gets called a LOT.
@@ -1305,12 +1308,12 @@ Showdown.converter = function (converter_options) {
     //  Input: an email address, e.g. "foo@example.com"
     //
     //  Output: the email address as a mailto link, with each character
-    //	of the address encoded as either a decimal or hex entity, in
-    //	the hopes of foiling most address harvesting spam bots. E.g.:
+    //  of the address encoded as either a decimal or hex entity, in
+    //  the hopes of foiling most address harvesting spam bots. E.g.:
     //
-    //	<a href="&#x6D;&#97;&#105;&#108;&#x74;&#111;:&#102;&#111;&#111;&#64;&#101;
-    //	   x&#x61;&#109;&#x70;&#108;&#x65;&#x2E;&#99;&#111;&#109;">&#102;&#111;&#111;
-    //	   &#64;&#101;x&#x61;&#109;&#x70;&#108;&#x65;&#x2E;&#99;&#111;&#109;</a>
+    //  <a href="&#x6D;&#97;&#105;&#108;&#x74;&#111;:&#102;&#111;&#111;&#64;&#101;
+    //     x&#x61;&#109;&#x70;&#108;&#x65;&#x2E;&#99;&#111;&#109;">&#102;&#111;&#111;
+    //     &#64;&#101;x&#x61;&#109;&#x70;&#108;&#x65;&#x2E;&#99;&#111;&#109;</a>
     //
     //  Based on a filter by Matthew Wickline, posted to the BBEdit-Talk
     //  mailing list: <http://tinyurl.com/yu7ue>

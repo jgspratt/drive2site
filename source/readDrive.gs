@@ -9,6 +9,8 @@ function readDriveTest() {
       logVerbose(key + " -> " + driveHash[key]['fileName']);
     }
   }
+  
+
 }
 
 
@@ -17,12 +19,19 @@ function readDriveToHash(driveHash, parentFolder, parentFolderPath) {
   // <path> : fileName:<fileName>, fileTitle<fileTitle>,
   // Where <path> is in the format "/parent-folder/child-file"
   // Pass in parent as the root folder
-  // Pass in parentPath as ''; it's for recursion
+  // Pass in parentFolderPath as ''; it's for recursion
   
   var childFolders = parentFolder.getFolders();
   var childFiles = parentFolder.getFiles();
   var parentFolderTitle = parentFolder.getName();
   var parentFolderName = convertTitleToUrlSafe(parentFolderTitle);
+  
+  var parentFolderIsBlobFolder = false;
+  if (parentFolderName.slice(-6) == '-blobs') {
+    // This is a blobs folder, by convention
+    parentFolderIsBlobFolder = true;
+    logVerbose('parentFolderIsBlobFolder: true');
+  }
   
   // These are the mimeTypes of supported files
   var supportedTypes = [
@@ -32,8 +41,8 @@ function readDriveToHash(driveHash, parentFolder, parentFolderPath) {
   
   // Ensure parent exists in driveHash
   // Needed to ensure parents are created before children are born.  For tax purposes.
-  if (!driveHash[parentFolderPath] && parentFolderPath !== '') {
-    // Child exists but no parent page exists; create a generic page in the hash.
+  if (!driveHash[parentFolderPath] && parentFolderPath !== '' && !parentFolderIsBlobFolder) {
+    // Child exists but no parent page exists (and we're not at the root) (and this isn't a blob); create a generic page in the hash.
     driveHash[parentFolderPath] = {'fileId':false, 'fileName':parentFolderName, 'fileTitle':parentFolderTitle};
   }
   
@@ -41,21 +50,42 @@ function readDriveToHash(driveHash, parentFolder, parentFolderPath) {
   while (childFiles.hasNext()) {
     var childFile = childFiles.next();
     var childFileType = childFile.getMimeType();
-    if (inArray(childFileType, supportedTypes)){
-      var childFileId = childFile.getId();
-      var childFileTitleLiteral = childFile.getName();  // Literally what is displayed in the drive
-      var childFileTitle = removeExtFromFilename(childFileTitleLiteral);  // Everything, minus the dot and extension
-      var childFileExt = extFromFilename(childFileTitleLiteral);  // The file extension
-      var childFileName = convertTitleToUrlSafe(childFileTitle);  // This is the URL safe (like-this)
-      var childFilePath = parentFolderPath + '/' + childFileName;
-      var childFileLastUpdated = childFile.getLastUpdated();
-      
-      logVerbose('Adding a file to the array: ' + childFilePath + ' of type: ' + childFileType);
-      logVerbose('fileId:' + childFileId);
-      logVerbose('fileTitleLiteral:' + childFileTitleLiteral);
-      logVerbose('fileTitle:' + childFileTitle);
-      logVerbose('fileExt:' + childFileExt);
-      logVerbose('fileName:' + childFileName);
+    
+    var childFileId = childFile.getId();
+    var childFileTitleLiteral = childFile.getName();  // Literally what is displayed in the drive (capitals, extensions, spaces, everything)
+    var childFileTitle = removeExtFromFilename(childFileTitleLiteral);  // Everything, minus the dot and extension
+    var childFileExt = extFromFilename(childFileTitleLiteral);  // The file extension
+    var childFileName = convertTitleToUrlSafe(childFileTitle);  // This is the URL safe (like-this)
+    var childFilePath = parentFolderPath + '/' + childFileName;
+    var childFileLastUpdated = childFile.getLastUpdated();
+    
+    var childFileIsBlob = true;  // Defaulting to true here because I don't want to try to make any blobs into page content
+    if (inArray(childFileType, supportedTypes) && !parentFolderIsBlobFolder) {
+      // Filetype is supported as page content and isn't in a blob folder; mark it so (so it ends up as an attachment)
+      var childFileIsBlob = false;
+    }
+    
+    var childFileIsDraft = (childFileName.slice(-6) == '-draft') ? true : false;
+    
+    if (childFileIsBlob) {
+      // If the child file is a blob, count the extension as part of the filename.
+      //   This is because you could have, say, moose.pdf and moose.jpg attached to 
+      //   the same page, but if you didn't add the path to the extension here, you'd
+      //   end up with a conflicting array key.
+      childFilePath = childFilePath + '.' + childFileExt;
+    }
+    
+    logVerbose('Adding a file to the array: ' + childFilePath + ' of type: ' + childFileType);
+    logVerbose('fileId:' + childFileId);
+    logVerbose('fileTitleLiteral:' + childFileTitleLiteral);
+    logVerbose('fileTitle:' + childFileTitle);
+    logVerbose('fileExt:' + childFileExt);
+    logVerbose('fileName:' + childFileName);
+    logVerbose('fileLastUpdated:' + childFileLastUpdated);
+    logVerbose('fileIsBlob:' + childFileIsBlob);
+    logVerbose('childFileIsDraft:' + childFileIsDraft);
+    
+    if (!childFileIsDraft) {
       driveHash[childFilePath] = {
         'fileId':childFileId, 
         'fileTitleLiteral':childFileTitleLiteral,
@@ -64,9 +94,12 @@ function readDriveToHash(driveHash, parentFolder, parentFolderPath) {
         'fileName':childFileName, 
         'fileType':childFileType,
         'fileLastUpdated':childFileLastUpdated,
+        'fileIsBlob':childFileIsBlob,
+        'fileIsDraft':childFileIsDraft,
       };
     }
   }
+  
   logVerbose('Gathered all files in ' + parentFolderTitle + '!');
   
   logVerbose('Recursing through subfolders...');
@@ -75,18 +108,22 @@ function readDriveToHash(driveHash, parentFolder, parentFolderPath) {
     var childFolder = childFolders.next();
     var childFolderTitle = childFolder.getName();  // This is what is literally displayed in the drive
     var childFolderName = convertTitleToUrlSafe(childFolderTitle);  // This is the URL safe (like-this)
-    var childFolderPath = parentFolderPath + '/' + childFolderName;
-    readDriveToHash(driveHash, childFolder, childFolderPath);
+    var childFolderIsDraft = (childFolderName.slice(-6) == '-draft') ? true : false;
+    if (!childFolderIsDraft) {
+      var childFolderPath = parentFolderPath + '/' + childFolderName;
+      readDriveToHash(driveHash, childFolder, childFolderPath);
+    }
   }
   logVerbose('Recursed through subfolders!');
 }
 
 
-function convertTitleToUrlSafe(fileTitle) {
-  var fileTitleLower = fileTitle.toLowerCase();
-  var fileTitleLowerSpaced = fileTitleLower.replace(/-/g, ' ');  // Turns '2015-02-21' into '2015 02 21' so it gets dashed later
-  var fileTitleLowerStripped = fileTitleLowerSpaced.replace(/[^\w\s]|_/g, "")
-  var fileTitleLowerStrippedDashed = fileTitleLowerStripped.replace(/\s+/g, "-");
-  return fileTitleLowerStrippedDashed;
+function getDocPlaintext(fileId) {
+  var document = DocumentApp.openById(fileId);
+  var body = document.getBody();
+  var text = body.getText();
+  var textNoFancyQuotes = stripFancyQuotes(text);
+  return textNoFancyQuotes;
 }
+
 
